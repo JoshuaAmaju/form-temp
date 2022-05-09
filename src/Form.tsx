@@ -26,6 +26,7 @@ export type Actions<T extends Record<string, any> = any> = {
   submit: () => void;
   cancelSubmit: () => void;
   kill: (id: string) => void;
+  submitAsync: () => Promise<any>;
   clearError: (id?: string) => void;
   change: <N extends keyof T>(name: N, value: T[N]) => void;
   validate: <N extends keyof T>(name: N, value?: T[N]) => void;
@@ -38,96 +39,96 @@ export type FormChild<T extends Record<string, any> = any> =
 
 export const Context = createContext<Values & Actions>(null);
 
-export const useForm = () => useContext(Context);
+// export const useForm = () => useContext(Context);
 
-export const Form = function Form<T extends Record<string, any>>({
-  children,
-  onSubmit,
-  initialValues,
-}: {
-  initialValues?: T;
-  onSubmit: Submitter<T>;
-  children: FormChild<T>;
-}) {
-  const [state, send] = useMachine(createConfig<T>(initialValues, onSubmit));
+// export const Form = function Form<T extends Record<string, any>>({
+//   children,
+//   onSubmit,
+//   initialValues,
+// }: {
+//   initialValues?: T;
+//   onSubmit: Submitter<T>;
+//   children: FormChild<T>;
+// }) {
+//   const [state, send] = useMachine(createConfig<T>(initialValues, onSubmit));
 
-  const {
-    values,
-    actors,
-    error,
-    errors,
-    states,
-    data,
-    failureCount,
-    errorUpdatedAt,
-    dataUpdatedAt,
-  } = state.context;
+//   const {
+//     values,
+//     actors,
+//     error,
+//     errors,
+//     states,
+//     data,
+//     failureCount,
+//     errorUpdatedAt,
+//     dataUpdatedAt,
+//   } = state.context;
 
-  const _state = state.value as FormState;
+//   const _state = state.value as FormState;
 
-  const submit = useCallback<Actions["submit"]>(() => send("submit"), [send]);
+//   const submit = useCallback<Actions["submit"]>(() => send("submit"), [send]);
 
-  const clearError = useCallback<Actions["clearError"]>(
-    (id) => send({ id, type: "clear_error" }),
-    [send]
-  );
+//   const clearError = useCallback<Actions["clearError"]>(
+//     (id) => send({ id, type: "clear_error" }),
+//     [send]
+//   );
 
-  const cancelSubmit = useCallback<Actions["cancelSubmit"]>(
-    () => send("cancel"),
-    [send]
-  );
+//   const cancelSubmit = useCallback<Actions["cancelSubmit"]>(
+//     () => send("cancel"),
+//     [send]
+//   );
 
-  const kill = useCallback<Actions["kill"]>(
-    (id) => send({ id, type: "kill" }),
-    [send]
-  );
+//   const kill = useCallback<Actions["kill"]>(
+//     (id) => send({ id, type: "kill" }),
+//     [send]
+//   );
 
-  const spawn = useCallback<Actions["spawn"]>(
-    (id, value, validator) => send({ id, value, validator, type: "spawn" }),
-    [send]
-  );
+//   const spawn = useCallback<Actions["spawn"]>(
+//     (id, value, validator) => send({ id, value, validator, type: "spawn" }),
+//     [send]
+//   );
 
-  const change = useCallback<Actions<T>["change"]>(
-    (id, value) => send({ id: id as string, value, type: "change" }),
-    [send]
-  );
+//   const change = useCallback<Actions<T>["change"]>(
+//     (id, value) => send({ id: id as string, value, type: "change" }),
+//     [send]
+//   );
 
-  const validate = useCallback<Actions<T>["validate"]>(
-    (id, value) => send({ value, id: id as string, type: "validate" }),
-    [send]
-  );
+//   const validate = useCallback<Actions<T>["validate"]>(
+//     (id, value) => send({ value, id: id as string, type: "validate" }),
+//     [send]
+//   );
 
-  const value = {
-    data,
-    error,
+//   const value = {
+//     data,
+//     error,
 
-    values,
-    states,
-    errors,
+//     values,
+//     states,
+//     errors,
 
-    failureCount,
-    dataUpdatedAt,
-    errorUpdatedAt,
+//     failureCount,
+//     dataUpdatedAt,
+//     errorUpdatedAt,
 
-    actors,
+//     actors,
 
-    kill,
-    spawn,
-    submit,
-    change,
-    validate,
-    clearError,
-    cancelSubmit,
+//     kill,
+//     spawn,
+//     submit,
+//     change,
+//     validate,
+//     clearError,
+//     cancelSubmit,
 
-    state: _state,
-  };
+//     state: _state,
+//   };
 
-  return (
-    <Context.Provider value={value}>
-      {typeof children === "function" ? children(value) : children}
-    </Context.Provider>
-  );
-};
+//   return (
+//     <Context.Provider value={value}>
+//       {typeof children === "function" ? children(value) : children}
+//     </Context.Provider>
+//   );
+// };
 
 export const createForm = function <T extends Record<string, any>>(
   context: React.Context<Values<T> & Actions<T>>
@@ -141,7 +142,9 @@ export const createForm = function <T extends Record<string, any>>(
     onSubmit: Submitter<T>;
     children: FormChild<T>;
   }) => {
-    const [state, send] = useMachine(createConfig<T>(initialValues, onSubmit));
+    const [state, send, service] = useMachine(
+      createConfig<T>(initialValues, onSubmit)
+    );
 
     const {
       data,
@@ -189,6 +192,22 @@ export const createForm = function <T extends Record<string, any>>(
       [send]
     );
 
+    const submitAsync = useCallback<Actions["submitAsync"]>(() => {
+      return new Promise((resolve, reject) => {
+        service.onTransition((s) => {
+          if (s.matches("submitted")) {
+            resolve(s.context.data);
+          }
+
+          if (s.matches("error")) {
+            reject(s.context.error);
+          }
+        });
+
+        send("submit");
+      });
+    }, [send, service]);
+
     const value = {
       data,
       error,
@@ -209,6 +228,7 @@ export const createForm = function <T extends Record<string, any>>(
       change,
       validate,
       clearError,
+      submitAsync,
       cancelSubmit,
 
       state: _state,

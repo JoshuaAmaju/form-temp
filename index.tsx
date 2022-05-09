@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "react-dom";
-import { Field } from "./src/Field";
-import { Form } from "./src/Form";
+// import { Field } from "./src/Field";
+// import { Form } from "./src/Form";
 import { create } from "./src";
 
 type FormType = {
@@ -100,182 +100,182 @@ const Login = () => {
   );
 };
 
-const App = () => {
-  return (
-    <Form<FormType>
-      initialValues={{ a: 0, b: 0, friends: [{ name: "fkjd", age: 20 }] }}
-      onSubmit={(v) => {
-        return new Promise((resolve, reject) => {
-          const result = v.a + v.b;
+// const App = () => {
+//   return (
+//     <Form<FormType>
+//       initialValues={{ a: 0, b: 0, friends: [{ name: "fkjd", age: 20 }] }}
+//       onSubmit={(v) => {
+//         return new Promise((resolve, reject) => {
+//           const result = v.a + v.b;
 
-          setTimeout(() => {
-            result % 2 > 0 ? reject("something went wrong") : resolve(result);
-          }, 2000);
-        });
-      }}
-    >
-      {({ values, error, data, state, states, change, submit }) => {
-        // console.log(states, state);
+//           setTimeout(() => {
+//             result % 2 > 0 ? reject("something went wrong") : resolve(result);
+//           }, 2000);
+//         });
+//       }}
+//     >
+//       {({ values, error, data, state, states, change, submit }) => {
+//         // console.log(states, state);
 
-        return (
-          <div>
-            {/* <div>
-              <label htmlFor="me">Remember Me</label>
+//         return (
+//           <div>
+//             {/* <div>
+//               <label htmlFor="me">Remember Me</label>
 
-              <input
-                name="me"
-                type="checkbox"
-                checked={values.rememberMe}
-                onChange={(e) => {
-                  change("rememberMe", e.target.checked);
-                }}
-              />
-            </div>
+//               <input
+//                 name="me"
+//                 type="checkbox"
+//                 checked={values.rememberMe}
+//                 onChange={(e) => {
+//                   change("rememberMe", e.target.checked);
+//                 }}
+//               />
+//             </div>
 
-            {values.rememberMe && (
-              <Field name="name" validator={(v) => v}>
-                {() => (
-                  <div>
-                    <label htmlFor="me">Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      onChange={(e) => {
-                        change("name", e.target.value);
-                      }}
-                    />
-                  </div>
-                )}
-              </Field>
-            )} */}
+//             {values.rememberMe && (
+//               <Field name="name" validator={(v) => v}>
+//                 {() => (
+//                   <div>
+//                     <label htmlFor="me">Name</label>
+//                     <input
+//                       type="text"
+//                       name="name"
+//                       onChange={(e) => {
+//                         change("name", e.target.value);
+//                       }}
+//                     />
+//                   </div>
+//                 )}
+//               </Field>
+//             )} */}
 
-            <ul>
-              {values.friends.map((friend, i) => {
-                const id = `friends.${i}`;
+//             <ul>
+//               {values.friends.map((friend, i) => {
+//                 const id = `friends.${i}`;
 
-                const age = `${id}.age`;
-                const name = `${id}.name`;
+//                 const age = `${id}.age`;
+//                 const name = `${id}.name`;
 
-                // console.log("here", friend);
+//                 // console.log("here", friend);
 
-                return (
-                  <li key={id}>
-                    <Field<string> name={name}>
-                      {({ change, validate }) => (
-                        <div>
-                          <label htmlFor={name}>Name</label>
-                          <input
-                            type="text"
-                            name={name}
-                            value={friend.name}
-                            onChange={(e) => change(e.target.value)}
-                          />
-                        </div>
-                      )}
-                    </Field>
+//                 return (
+//                   <li key={id}>
+//                     <Field<string> name={name}>
+//                       {({ change, validate }) => (
+//                         <div>
+//                           <label htmlFor={name}>Name</label>
+//                           <input
+//                             type="text"
+//                             name={name}
+//                             value={friend.name}
+//                             onChange={(e) => change(e.target.value)}
+//                           />
+//                         </div>
+//                       )}
+//                     </Field>
 
-                    <Field<number> name={age} validator={isNumber}>
-                      {({ error, validate }) => (
-                        <div>
-                          <label htmlFor={age}>Age</label>
-                          <input
-                            name={age}
-                            type="text"
-                            value={friend.age}
-                            // inputMode="numeric"
-                            onChange={(e) => validate(+e.target.value)}
-                          />
+//                     <Field<number> name={age} validator={isNumber}>
+//                       {({ error, validate }) => (
+//                         <div>
+//                           <label htmlFor={age}>Age</label>
+//                           <input
+//                             name={age}
+//                             type="text"
+//                             value={friend.age}
+//                             // inputMode="numeric"
+//                             onChange={(e) => validate(+e.target.value)}
+//                           />
 
-                          {error && <span>{error.message}</span>}
-                        </div>
-                      )}
-                    </Field>
+//                           {error && <span>{error.message}</span>}
+//                         </div>
+//                       )}
+//                     </Field>
 
-                    <button
-                      onClick={() => {
-                        // let a = [...values.friends];
+//                     <button
+//                       onClick={() => {
+//                         // let a = [...values.friends];
 
-                        // console.log(i, a);
+//                         // console.log(i, a);
 
-                        // a.splice(i, 1);
+//                         // a.splice(i, 1);
 
-                        // console.log(i, a);
+//                         // console.log(i, a);
 
-                        values.friends.splice(i, 1);
-                        change("friends", values.friends);
-                      }}
-                    >
-                      remove
-                    </button>
-                  </li>
-                );
-              })}
+//                         values.friends.splice(i, 1);
+//                         change("friends", values.friends);
+//                       }}
+//                     >
+//                       remove
+//                     </button>
+//                   </li>
+//                 );
+//               })}
 
-              <button
-                onClick={() => {
-                  change("friends", [...values.friends, { name: "", age: 0 }]);
-                }}
-              >
-                add
-              </button>
-            </ul>
+//               <button
+//                 onClick={() => {
+//                   change("friends", [...values.friends, { name: "", age: 0 }]);
+//                 }}
+//               >
+//                 add
+//               </button>
+//             </ul>
 
-            <Field<number, string> name="a" validator={(v) => v}>
-              {({ value, change }) => {
-                return (
-                  <div>
-                    <label htmlFor="name">a</label>
+//             <Field<number, string> name="a" validator={(v) => v}>
+//               {({ value, change }) => {
+//                 return (
+//                   <div>
+//                     <label htmlFor="name">a</label>
 
-                    <input
-                      type="number"
-                      value={value}
-                      onChange={(e) => change(+e.target.value)}
-                    />
-                  </div>
-                );
-              }}
-            </Field>
+//                     <input
+//                       type="number"
+//                       value={value}
+//                       onChange={(e) => change(+e.target.value)}
+//                     />
+//                   </div>
+//                 );
+//               }}
+//             </Field>
 
-            <span>+</span>
+//             <span>+</span>
 
-            <Field<number, string> name="b" validator={(v) => v}>
-              {({ value, state, change, validate }) => {
-                return (
-                  <div>
-                    <label htmlFor="name">b</label>
+//             <Field<number, string> name="b" validator={(v) => v}>
+//               {({ value, state, change, validate }) => {
+//                 return (
+//                   <div>
+//                     <label htmlFor="name">b</label>
 
-                    <input
-                      type="number"
-                      value={value}
-                      onChange={(e) => change(+e.target.value)}
-                    />
+//                     <input
+//                       type="number"
+//                       value={value}
+//                       onChange={(e) => change(+e.target.value)}
+//                     />
 
-                    <span>=</span>
-                  </div>
-                );
-              }}
-            </Field>
+//                     <span>=</span>
+//                   </div>
+//                 );
+//               }}
+//             </Field>
 
-            <button type="button" onClick={submit}>
-              calculate
-            </button>
+//             <button type="button" onClick={submit}>
+//               calculate
+//             </button>
 
-            {(state === "validating" || state === "submitting") && (
-              <span>calculating</span>
-            )}
+//             {(state === "validating" || state === "submitting") && (
+//               <span>calculating</span>
+//             )}
 
-            {data && <span>{data}</span>}
+//             {data && <span>{data}</span>}
 
-            {error && <span style={{ color: "red" }}>{error}</span>}
+//             {error && <span style={{ color: "red" }}>{error}</span>}
 
-            <code>
-              <pre>{JSON.stringify(values)}</pre>
-            </code>
-          </div>
-        );
-      }}
-    </Form>
-  );
-};
+//             <code>
+//               <pre>{JSON.stringify(values)}</pre>
+//             </code>
+//           </div>
+//         );
+//       }}
+//     </Form>
+//   );
+// };
 
 render(<Login />, document.getElementById("app"));

@@ -1,9 +1,9 @@
 import { useActor } from "@xstate/react";
 import React, { useEffect, useContext } from "react";
 import { useUnmount } from "react-use";
-import { ActorRef, State } from "xstate";
+import { ActorRef, Sender, State } from "xstate";
 import * as actor from "./actor";
-import { useForm } from "./Form";
+// import { useForm } from "./Form";
 import { ActorState, Validator } from "./types";
 
 // type Setters<T, E> = { name: "value"; value: T } | { name: "error"; value: E };
@@ -26,61 +26,62 @@ export type FieldChild<T = any, E = any> = (
     }
 ) => JSX.Element;
 
-export const Actor = function Actor<T, E>({
+export const UseActor = function Actor<T, E>({
   actor,
   children,
 }: {
   actor: ActorRef<actor.Events>;
   children: (
-    v: State<actor.Ctx<T, E>, actor.Events, actor.States>
+    v: State<actor.Ctx<T, E>, actor.Events, actor.States>,
+    sender: Sender<actor.Events>
   ) => JSX.Element;
 }) {
-  const [state] = useActor(actor);
-  return children(state);
+  const [state, send] = useActor(actor);
+  return children(state, send);
 };
 
-export const Field = function Field<T, E = any>({
-  name,
-  value,
-  children,
-  validator = (v) => v,
-}: {
-  value?: T;
-  name: string;
-  children: FieldChild<T, E>;
-  validator?: Validator<T>;
-}) {
-  const form = useForm();
-  const actor = form.actors[name];
+// export const Field = function Field<T, E = any>({
+//   name,
+//   value,
+//   children,
+//   validator = (v) => v,
+// }: {
+//   value?: T;
+//   name: string;
+//   children: FieldChild<T, E>;
+//   validator?: Validator<T>;
+// }) {
+//   const form = useForm();
+//   const actor = form.actors[name];
 
-  useEffect(() => {
-    if (!actor) form.spawn(name, value, validator);
-  }, [name, actor, value, validator, form.spawn]);
+//   useEffect(() => {
+//     if (!actor) form.spawn(name, value, validator);
+//   }, [name, actor, value, validator, form.spawn]);
 
-  useUnmount(() => {
-    actor && form.kill(name);
-  });
+//   useUnmount(() => {
+//     actor && form.kill(name);
+//   });
 
-  return actor ? (
-    <Actor<T, E> actor={actor}>
-      {(state) => {
-        const { value, error } = state.context;
+//   return actor ? (
+//     <Actor<T, E> actor={actor}>
+//       {(state) => {
+//         const { value, error } = state.context;
 
-        const states = state.value as ActorState;
+//         const states = state.value as ActorState;
 
-        const change: Actions<T>["change"] = (v) => {
-          form.change(name, v);
-        };
+//         const change: Actions<T>["change"] = (v) => {
+//           form.change(name, v);
+//         };
 
-        const validate: Actions<T>["validate"] = (v) => {
-          form.validate(name, v);
-        };
+//         const validate: Actions<T>["validate"] = (v) => {
+//           form.validate(name, v);
+//         };
 
-        return children({ value, error, state: states, validate, change });
-      }}
-    </Actor>
-  ) : null;
-};
+//         return children({ value, error, state: states, validate, change });
+//       }}
+//     </Actor>
+//   ) : null;
+// };
 
 export const createField = function <T extends Record<string, any>, E = any>(
   context: React.Context<any>
@@ -108,7 +109,7 @@ export const createField = function <T extends Record<string, any>, E = any>(
     });
 
     return actor ? (
-      <Actor<P, E> actor={actor}>
+      <UseActor<P, E> actor={actor}>
         {(state) => {
           const { value, error } = state.context;
 
@@ -124,7 +125,7 @@ export const createField = function <T extends Record<string, any>, E = any>(
 
           return children({ value, error, state: states, validate, change });
         }}
-      </Actor>
+      </UseActor>
     ) : null;
   };
 };
